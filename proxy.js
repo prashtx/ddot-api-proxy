@@ -3,10 +3,16 @@
 var http = require('http');
 var request = require('request');
 var u = require('url');
+var connect = require('connect');
 
 var API = process.env.OBA_API;
+var port = process.env.PORT || 3001;
 
-var server = http.createServer(function (req, resp) {
+var app = connect();
+var server = http.createServer(app);
+
+app.use(connect.compress())
+.use(function (req, resp) {
   var parts = u.parse(req.url);
   var url = API + parts.pathname + parts.search;
 
@@ -22,7 +28,7 @@ var server = http.createServer(function (req, resp) {
   req.pipe(request({url: url, headers: headers})).pipe(resp);
 });
 
-var port = process.env.PORT || 3001;
+
 server.listen(port, function () {
   console.log('Listening on ' + port);
 });
