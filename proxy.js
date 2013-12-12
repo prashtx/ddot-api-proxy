@@ -13,7 +13,10 @@ var server = http.createServer(app);
 
 app.use(connect.compress())
 .use(function (req, resp) {
-  var parts = u.parse(req.url);
+  var parts = u.parse(req.url, true);
+  parts.query.key = 'BETA';
+  parts.search = undefined;
+  parts = u.parse(u.format(parts));
   var url = API + parts.pathname + parts.search;
 
   resp.setHeader('Access-Control-Allow-Origin', '*');
