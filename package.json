@@ -1,10 +1,10 @@
 {
-    "name": "obaproxy"
-  , "version": "0.0.1"
+    "name": "oba-api-proxy"
+  , "version": "0.1.0"
   , "private": true
-  , "engines" : { "node" : "0.6.x" }
+  , "engines" : { "node" : "0.10.x" }
   , "dependencies": {
-      "request" : "2.9.x",
-      "connect" : "2.4.x"
+      "request" : "~2.33.0",
+      "connect" : "~2.12.0"
   }
 }
