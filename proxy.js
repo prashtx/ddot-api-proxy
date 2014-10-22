@@ -2,9 +2,12 @@
 'use strict';
 
 var http = require('http');
-var request = require('request');
 var u = require('url');
+
+var compression = require('compression');
 var connect = require('connect');
+var request = require('request');
+
 var settings = require('./lib/settings');
 
 var API = settings.api;
@@ -13,8 +16,18 @@ var port = settings.port;
 var app = connect();
 var server = http.createServer(app);
 
-app.use(connect.compress())
+var count = 0;
+
+app.use(compression())
 .use(function (req, resp) {
+  count += 1;
+  console.log('info active_requests=' + count);
+
+  req.client.on('close', function () {
+    count -= 1;
+    console.log('info active_requests=' + count);
+  });
+
   var parts = u.parse(req.url, true);
   var inboundKey = parts.query.key;
 
@@ -46,7 +59,11 @@ app.use(connect.compress())
   headers['Cache-Control'] = 'max-age=0';
 
   // Pipe the request
-  var obaResponse = req.pipe(request({ url: url, headers: headers }));
+  var obaResponse = req.pipe(request({
+    url: url,
+    headers: headers,
+    maxSockets: 100
+  }));
   obaResponse.pipe(resp);
   obaResponse.on('error', function (error) {
     console.log('Error sending request to the actual OBA server');
