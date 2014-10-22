@@ -59,17 +59,31 @@ app.use(compression())
   headers['Cache-Control'] = 'max-age=0';
 
   // Pipe the request
-  var obaResponse = req.pipe(request({
+  var obaRequest = request({
     url: url,
     headers: headers,
     maxSockets: 100
-  }));
+  });
+
+  var time;
+  obaRequest.on('socket', function () {
+    time = Date.now();
+  });
+
+  var obaResponse = req.pipe(obaRequest);
   obaResponse.pipe(resp);
   obaResponse.on('error', function (error) {
     console.log('Error sending request to the actual OBA server');
     console.log(error);
     resp.statusCode = 500;
     resp.end('Internal Server Error');
+  });
+
+  obaResponse.on('end', function () {
+    if (time) {
+      time = Date.now() - time;
+      console.log('info service_time=' + time);
+    }
   });
 });
 
