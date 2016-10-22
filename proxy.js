@@ -16,12 +16,21 @@ var port = settings.port;
 var app = connect();
 var server = http.createServer(app);
 
+var MS_TIMEOUT = process.env.MS_TIMEOUT || 7000;
+var MAX_REQUESTS = process.env.MAX_REQUESTS || 30;
+
 var count = 0;
 
 app.use(compression())
 .use(function (req, resp) {
   count += 1;
   console.log('info active_requests=' + count);
+
+  if (count > MAX_REQUESTS) {
+    resp.statusCode = 503;
+    resp.end('Server under high load, try again later');
+    return;
+  }
 
   req.client.on('close', function () {
     count -= 1;
@@ -62,7 +71,8 @@ app.use(compression())
   var obaRequest = request({
     url: url,
     headers: headers,
-    maxSockets: 100
+    maxSockets: 100,
+    timeout: MS_TIMEOUT
   });
 
   var time;
@@ -75,6 +85,13 @@ app.use(compression())
   obaResponse.on('error', function (error) {
     console.log('Error sending request to the actual OBA server');
     console.log(error);
+
+    if (error.code === 'ETIMEDOUT') {
+      resp.statusCode = 504;
+      resp.end('OBA server timed out');
+      return;
+    }
+
     resp.statusCode = 500;
     resp.end('Internal Server Error');
   });
