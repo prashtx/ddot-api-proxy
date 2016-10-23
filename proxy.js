@@ -91,3 +91,5 @@ app.use(compression())
 server.listen(port, function () {
   console.log('Listening on ' + port);
 });
+
+exports.app = app;

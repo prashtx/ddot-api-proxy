@@ -1,0 +1,8 @@
+language: node_js
+node_js:
+ - "4.4.x"
+env:
+  global:
+    - OBA_API="http://example.com"
+    - OBA_API_KEY="rilke"
+    - KEYS='["validkey"]'
