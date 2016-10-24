@@ -50,12 +50,12 @@ describe('Heavy load situations', function() {
   });
 
   it('drops requests if too many pile up', function(done) {
+    var agent = request.agent(server.app);
+
     // Make all our requests too slow
     Array(31).fill().map((_, i) => {
       nockMe(10000);
     });
-
-    var agent = request.agent(server.app);
 
     // Fire off MAX_REQUESTS worth of requests we don't care about
     function task() {
@@ -71,6 +71,29 @@ describe('Heavy load situations', function() {
         nock.cleanAll(); // in case there are pending / unused nocks
         done(error);
       });
+  });
+
+  xit('picks back up after things calm down', function(done) {
+    var agent = request.agent(server.app);
+
+    // Make all our requests too slow
+    Array(31).fill().map((_, i) => {
+      nockMe(2000);
+    });
+
+    function get() {
+      agent.get(`/api/api/where/agencies-with-coverage.json?key=${KEY}&format=json`)
+           .end(function() { }); // handle end otherwise supertest dies on 503s
+    }
+    var gets = Array(31).fill(get);
+    async.parallel(gets); 
+    
+    // Wait a while for all those resolve...
+    setTimeout(function() {
+      agent
+        .get(`/api/api/where/agencies-with-coverage.json?key=${KEY}&format=json`)
+        .expect(200, done);
+    }, 3000);
   });
 });
 

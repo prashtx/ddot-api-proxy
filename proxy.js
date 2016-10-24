@@ -26,16 +26,16 @@ app.use(compression())
   count += 1;
   console.log('info active_requests=' + count);
 
+  req.client.on('close', function () {
+    count -= 1;
+    console.log('info active_requests=' + count);
+  });
+
   if (count > MAX_REQUESTS) {
     resp.statusCode = 503;
     resp.end('Server under high load, try again later');
     return;
   }
-
-  req.client.on('close', function () {
-    count -= 1;
-    console.log('info active_requests=' + count);
-  });
 
   var parts = u.parse(req.url, true);
   var inboundKey = parts.query.key;
