@@ -16,8 +16,8 @@ var port = settings.port;
 var app = connect();
 var server = http.createServer(app);
 
-var MS_TIMEOUT = process.env.MS_TIMEOUT || 7000;
-var MAX_REQUESTS = process.env.MAX_REQUESTS || 30;
+var MS_TIMEOUT = Number(process.env.MS_TIMEOUT) || 7000;
+var MAX_REQUESTS = Number(process.env.MAX_REQUESTS) || 30;
 
 var count = 0;
 
