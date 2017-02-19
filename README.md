@@ -15,3 +15,7 @@ environment variables:
 
 * `MAX_REQUESTS`: Default 30.
 * `MS_TIMEOUT`: Default 7000 (7 seconds)
+
+## Tests
+
+`npm test`

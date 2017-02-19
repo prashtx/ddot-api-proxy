@@ -26,13 +26,13 @@ app.use(compression())
   count += 1;
   console.log('info active_requests=' + count);
   
-  // Add CORS headers
-  resp.setHeader('Access-Control-Allow-Origin', '*');
-
   req.client.on('close', function () {
     count -= 1;
     console.log('info active_requests=' + count);
   });
+
+  // Add CORS headers
+  resp.setHeader('Access-Control-Allow-Origin', '*');
 
   if (count > MAX_REQUESTS) {
     resp.statusCode = 503;
@@ -48,9 +48,12 @@ app.use(compression())
 
   // Check if we should use the new API or the old API
   var urlParts = parts.pathname.split('/');
-  if (urlParts && urlParts[1] === 'v2') {
+  if (settings.newAPI && 
+      urlParts && 
+      urlParts[1] === 'v2') {
     apiURL = settings.newAPI;
-    // We need to get rid of the "v2" prefix
+
+    // We also need to get rid of the "v2" prefix
     parts.pathname = '/' + urlParts.splice(2).join('/');
   }
 
@@ -68,8 +71,6 @@ app.use(compression())
   parts.search = undefined;
   parts = u.parse(u.format(parts));
   var url = apiURL + parts.pathname + parts.search;
-
-  console.log("using URL", url);
 
 
   // Copy headers from the origin client request to our request
