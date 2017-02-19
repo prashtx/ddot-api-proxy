@@ -25,6 +25,9 @@ app.use(compression())
 .use(function (req, resp) {
   count += 1;
   console.log('info active_requests=' + count);
+  
+  // Add CORS headers
+  resp.setHeader('Access-Control-Allow-Origin', '*');
 
   req.client.on('close', function () {
     count -= 1;
@@ -40,6 +43,18 @@ app.use(compression())
   var parts = u.parse(req.url, true);
   var inboundKey = parts.query.key;
 
+
+  var apiURL = API;
+
+  // Check if we should use the new API or the old API
+  var urlParts = parts.pathname.split('/');
+  if (urlParts && urlParts[1] === 'v2') {
+    apiURL = settings.newAPI;
+    // We need to get rid of the "v2" prefix
+    parts.pathname = '/' + urlParts.splice(2).join('/');
+  }
+
+
   // Check if the provided key is valid.
   if (settings.keys.indexOf(inboundKey) === -1) {
     // Invalid key. Send a 403.
@@ -52,10 +67,10 @@ app.use(compression())
   parts.query.key = settings.apiKey;
   parts.search = undefined;
   parts = u.parse(u.format(parts));
-  var url = API + parts.pathname + parts.search;
+  var url = apiURL + parts.pathname + parts.search;
 
-  // Add CORS headers
-  resp.setHeader('Access-Control-Allow-Origin', '*');
+  console.log("using URL", url);
+
 
   // Copy headers from the origin client request to our request
   var headers = {};
