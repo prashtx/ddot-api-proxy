@@ -54,6 +54,10 @@ app.use(compression())
   parts = u.parse(u.format(parts));
   var url = API + parts.pathname + parts.search;
 
+  // Fix double api
+  // TODO: we should 301 permanent redirect
+  url = url.replace('/api/api', '/api');
+
   // Add CORS headers
   resp.setHeader('Access-Control-Allow-Origin', '*');
 
